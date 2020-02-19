@@ -6,24 +6,27 @@ RKPolyMux psgmux;
 
 RK002_DECLARE_INFO("GenMDM poly mode", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
-RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
+RK002_DECLARE_PARAM(FMCHANNEL, 0, 0, 16, 1)
+RK002_DECLARE_PARAM(PSGCHANNEL, 0, 0, 16, 2)
 
 //Enable debug messages
-#define DEBUG true
+#define DEBUG false
 
 // Define a specific value to detect if tables are already present in RK002 memory
-#define FLASH_SIGNATURE 0xACDCABBA
+#define FLASH_SIGNATURE 0xABBAACDC
 
 // Define the amount of presets to store / range of the CC #116 (Select preset slot)
-#define NUM_PRESETS 16
+// Probably RAM and EEPROM are the things that put most limitations to this
+#define NUM_PRESETS 10
 
 // Define memory table structure
 struct
 {
   uint32_t signature;
-  byte preset[NUM_PRESETS][127];
+  byte preset[NUM_PRESETS][128];
 } flashData;
+
+byte activeSettings[128];
 
 // Global variables
 byte fmChannel = 0;
@@ -34,10 +37,10 @@ bool psgModLfoDirectionUp = false;
 byte psgModLfoDepth = 0;
 byte psgModLfoSkipCycle = 0;
 
-uint8_t currentPreset = 0;
+uint8_t selectedPreset = 0;
 
 // Read / initialize memory with lookup tables
-void recallPresetsFromFlash()
+bool recallPresetsFromFlash()
 {
   if (DEBUG) RK002_printf("recallPresetsFromFlash: Reading flash");
   int res = RK002_readFlash(0, sizeof(flashData), (byte*)&flashData);
@@ -58,36 +61,53 @@ void recallPresetsFromFlash()
 
     flashData.signature = FLASH_SIGNATURE;
   }
+  if ((res != 0) || (flashData.signature != FLASH_SIGNATURE)) return false;
+  else return true;
 }
 
 // Write table data to RK002 memory
-void storePresetsInFlash()
+void storeAllPresetsInFlash()
 {
-  if (DEBUG) RK002_printf("storePresetsInFlash: Writing to flash");
+  if (DEBUG) RK002_printf("-- storeAllPresetsInFlash ---");
+  //put current settings to selected preset slot
+  storeCurrentSettingsToPreset();
+  if (DEBUG) RK002_printf("Writing to flash");
   int res = RK002_writeFlash(0, sizeof(flashData), (byte*)&flashData);
-  if (DEBUG && res != 0) RK002_printf("storePresetsInFlash: Write failed");
+  if (DEBUG && res != 0) RK002_printf("Write failed");
 
 }
 
-// Send current preset to GenMDM, store in GenMDM RAM for faster access
-void sendPresetToDevice()
+void storeCurrentSettingsToPreset()
 {
-  if (DEBUG) RK002_printf("sendPresetToDevice: sending preset %d to device", currentPreset);
+  if (DEBUG) RK002_printf("-- storePreset ---");
+  for (int i=0;i<127;i++)
+  {
+    flashData.preset[selectedPreset][i] = activeSettings[i];
+    if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,i,activeSettings[i]);
+  }
+}
+
+// Send current preset to GenMDM, store in GenMDM RAM for faster access
+void sendPresetToDevice(byte presetNo)
+{
+  if (DEBUG) RK002_printf("sendPresetToDevice: sending preset %d to device", selectedPreset);
   uint8_t i, j;
 
   for (j = 0; j < 128; j++)
   {
-    if (flashData.preset[currentPreset][j] != 255)
+    if (flashData.preset[presetNo][j] != 255)
     {
-      for (i = 0; i < 6; i++)
+      if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
+      activeSettings[j] = flashData.preset[selectedPreset][j];
+      for (i = 0; i < 5; i++)
       {
-        RK002_sendControlChange(i, j, flashData.preset[currentPreset][j]);
+        RK002_sendControlChange(i, j, flashData.preset[selectedPreset][j]);
       }
     }
   }
 
   //Store preset in GenMDM's RAM for faster access.
-  uint8_t genMdmPresetSlot = ((128 / 16) * currentPreset) - 1;
+  uint8_t genMdmPresetSlot = ((128 / 16) * selectedPreset) - 1;
   RK002_sendControlChange(0, 6, genMdmPresetSlot);
 }
 
@@ -104,7 +124,8 @@ void sendAllPresetsToDevice()
     {
       if (flashData.preset[k][j] != 255)
       {
-        for (i = 0; i < 6; i++)
+        if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
+        for (i = 0; i < 5; i++)
         {
           RK002_sendControlChange(i, j, flashData.preset[k][j]);
         }
@@ -163,29 +184,30 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         doPoly = false;
 
         // Store the message to our preset array (except if it's modwheel or preset related)
-        if (d1 != 1 || d1 != 116 || d1 != 117 || d1 != 118)
+        if (d1 != 1 && d1 != 116 && d1 != 117 && d1 != 118)
         {
-          flashData.preset[currentPreset][d1 - 1] = d2;
-          return false;
+          activeSettings[d1] = d2;
+          if (DEBUG) RK002_printf("aS CC %d value %d",d1,d2);
         }
 
         // Select preset slot
         if (d1 == 116)
         {
-          if (d2 < NUM_PRESETS) currentPreset = d2;
+          if (d2 < NUM_PRESETS) selectedPreset = d2;
           return false;
         }
 
         // Send currently selected preset to device
         if (d1 == 117)
         {
-          sendPresetToDevice();
+          sendPresetToDevice(selectedPreset);
           return false;
         }
 
         if (d1 == 118)
         {
-          storePresetsInFlash();
+          storeAllPresetsInFlash();
+          return false;
         }
 
         // Send the CC message to all FM channels
@@ -258,14 +280,19 @@ void updatePsgModLfo()
 
 void setup()
 {
+  //initialize the active settings array
+  for (int i=0; i<128; i++)
+  {
+    activeSettings[i] = 255;
+  }
+  if (DEBUG) RK002_printf("Flashdata size %d",sizeof(flashData));
   fmChannel = (RK002_paramGet(FMCHANNEL) == 0) ? 16 : RK002_paramGet(FMCHANNEL) - 1;
   psgChannel = (RK002_paramGet(PSGCHANNEL) == 0) ? 16 : RK002_paramGet(PSGCHANNEL) - 1;
   polymux.setOutputHandler(onFmPolyMuxOutput, 0);
-  polymux.setPolyphony(6); // 5 channels polymux
+  polymux.setPolyphony(5); // 5 channels polymux
   psgmux.setOutputHandler(onPsgPolyMuxOutput, 0);
   psgmux.setPolyphony(3); // 3 chans for psg
-  recallPresetsFromFlash();
-  sendAllPresetsToDevice();
+  if (recallPresetsFromFlash()) sendPresetToDevice(1);
 }
 
 void loop()
