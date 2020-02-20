@@ -34,10 +34,14 @@ byte psgChannel = 0;
 
 bool psgModLfoActive = false;
 bool psgModLfoDirectionUp = false;
+byte psgModLfoSpeed = 50;
 byte psgModLfoDepth = 0;
 byte psgModLfoSkipCycle = 0;
+int psgModLfoPbValue = 0;
 
 uint8_t selectedPreset = 0;
+
+unsigned long tmr_psglfo = 0;
 
 // Read / initialize memory with lookup tables
 bool recallPresetsFromFlash()
@@ -240,17 +244,20 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
       // Handle control change messages
       case 0xB0:
         // CC1 = Modwheel
-        if (d1 == 1)
+        if (d1 == 0x01)
         {
           doPoly = false;
           if (d2 > 0)
           {
+            psgModLfoActive = true;
             psgModLfoDepth = d2;
+            tmr_psglfo = millis();
           }
           else
           {
             psgModLfoDepth = 0;
             psgModLfoActive = false;
+            tmr_psglfo = 0;
           }
         }
         break;
@@ -266,11 +273,28 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 // PSG Pitch LFO
 // The PSG channel on the GenMDM does not support modwheel :( We'll work around this by generating some pitch bend messages once every few cycles
 void updatePsgModLfo()
-{
-  if (psgModLfoSkipCycle == 4)
+{  
+  // Do not send the message on every cycle, creates too many messages...
+  unsigned long t_now = millis();
+  if ((t_now - tmr_psglfo) >= 10)
   {
-    // Do stuff and reset the counter to 0
-    psgModLfoSkipCycle = 0;
+    if (psgModLfoDirectionUp)
+    {
+      psgModLfoPbValue += (psgModLfoSpeed+(psgModLfoDepth*3));
+      for (int i=6; i<9; i++){
+        RK002_sendPitchBend(i, psgModLfoPbValue);  
+      }
+      if (psgModLfoPbValue > psgModLfoDepth*10) psgModLfoDirectionUp = false;
+    }
+    else
+    {
+      psgModLfoPbValue -= (psgModLfoSpeed+(psgModLfoDepth*3));
+      for (int i=6; i<9; i++){
+        RK002_sendPitchBend(i, psgModLfoPbValue);  
+      }
+      if (-psgModLfoPbValue > psgModLfoDepth*10) psgModLfoDirectionUp = true;
+    }
+    tmr_psglfo = millis();
   }
   else
   {
