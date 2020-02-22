@@ -36,12 +36,10 @@ bool psgModLfoActive = false;
 bool psgModLfoDirectionUp = false;
 byte psgModLfoSpeed = 50;
 byte psgModLfoDepth = 0;
-byte psgModLfoSkipCycle = 0;
 int psgModLfoPbValue = 0;
+unsigned long tmr_psglfo = 0;
 
 uint8_t selectedPreset = 0;
-
-unsigned long tmr_psglfo = 0;
 
 // Read / initialize memory with lookup tables
 bool recallPresetsFromFlash()
@@ -102,10 +100,10 @@ void sendPresetToDevice(byte presetNo)
     if (flashData.preset[presetNo][j] != 255)
     {
       if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
-      activeSettings[j] = flashData.preset[selectedPreset][j];
+      activeSettings[j] = flashData.preset[presetNo][j];
       for (i = 0; i < 5; i++)
       {
-        RK002_sendControlChange(i, j, flashData.preset[selectedPreset][j]);
+        RK002_sendControlChange(i, j, flashData.preset[presetNo][j]);
       }
     }
   }
@@ -135,9 +133,11 @@ void sendAllPresetsToDevice()
         }
       }
     }
+    delay(100);
     //Store preset in GenMDM's RAM for faster access.
     uint8_t genMdmPresetSlot = ((128 / 16) * (k + 1)) - 1;
     RK002_sendControlChange(0, 6, genMdmPresetSlot);
+    delay(500);
   }
 }
 
@@ -188,7 +188,7 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         doPoly = false;
 
         // Store the message to our preset array (except if it's modwheel or preset related)
-        if (d1 != 1 && d1 != 116 && d1 != 117 && d1 != 118)
+        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != 116 && d1 != 117 && d1 != 118)
         {
           activeSettings[d1] = d2;
           if (DEBUG) RK002_printf("aS CC %d value %d",d1,d2);
@@ -212,6 +212,11 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         {
           storeAllPresetsInFlash();
           return false;
+        }
+
+        if (d1 == 119)
+        {
+          sendAllPresetsToDevice();
         }
 
         // Send the CC message to all FM channels
@@ -295,10 +300,6 @@ void updatePsgModLfo()
       if (-psgModLfoPbValue > psgModLfoDepth*10) psgModLfoDirectionUp = true;
     }
     tmr_psglfo = millis();
-  }
-  else
-  {
-    psgModLfoSkipCycle++;
   }
 }
 

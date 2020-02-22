@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>genmdm_polymux TFI tool</title>
+        <script src="https://cdn.jsdelivr.net/npm/webmidi"></script>
+    </head>
+    <body>
+        <h1>genmdm_polymux TFI tool</h1>
+        <form>
+            <h3>Settings</h3>
+            <table>
+                <tr>
+                    <td>
+                        <label for="midiout">MIDI out port: </label>
+                    </td>
+                    <td>
+                        <select name="midiout" id="selMidiout">
+                    </td>
+                </tr>
+                <tr>
+                    <td>
+                        <label for="midich">MIDI channel: </label>    
+                    </td>
+                    <td>
+                        <input id="midich" type="number" min="1" max="16" value="1">
+                    </td>
+                </tr>
+            </table>
+
+            
+            </select>
+            
+            
+
+            <h3>Load TFI</h3>
+            <input type="file" id="tfifile">
+            <h3>Global</h3>
+            <table>
+                <tr>
+                    <td>Algorithm</td>
+                    <td><input id="Algorithm" data-ccvalue="14" range="8" type="number" min="0" value="0" max="7"></td>
+                </tr>
+                <tr>
+                    <td>LFO FM</td>
+                    <td><input id="LFOFM" data-ccvalue="75"  range="8" type="number" min="0" value="0" max="7"></td>
+                </tr>                
+                <tr>
+                    <td>LFO AM</td>
+                    <td><input id="LFOAM" data-ccvalue="76" range="8" type="number" min="0" value="0" max="7"></td>
+                </tr>                
+                <tr>
+                    <td>Feedback</td>
+                    <td><input id="Feedback" data-ccvalue="15" range="8" type="number" min="0" value="0" max="7"></td>
+                </tr>                
+                <tr>
+                    <td>Panning</td>
+                    <td><input id="Panning" data-ccvalue="77" range="4" type="number" min="0" value="0" max="3"></td>
+                </tr>                
+            </table>
+            <h3>Operators</h3>
+            <table>
+                <tr>
+                    <th>
+                        <td>LVL</td><td>DET</td><td>ATT</td><td>DEC1</td><td>DEC2</td><td>MUL</td><td>RSC</td><td>AMP2</td><td>REL</td><td>LFO</td><td>SSG</td>
+                    </th>
+                </tr>
+                <tr>
+                    <td>OP 1</td>
+                    <td><input id="OP1LVL" data-ccvalue="16" range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP1DET" data-ccvalue="24" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP1ATT" data-ccvalue="43" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP1DEC1" data-ccvalue="47" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP1DEC2" data-ccvalue="51" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1MUL" data-ccvalue="20" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1RSC" data-ccvalue="39" range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP1AMP2" data-ccvalue="55" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1REL" data-ccvalue="59" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1LFO" data-ccvalue="70" range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP1SSG" data-ccvalue="90" range="16" type="number" min="0" value="0" max="15"></td>
+                </tr>
+                <tr>
+                    <td>OP 2</td>
+                    <td><input id="OP2LVL" data-ccvalue="17" range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP2DET" data-ccvalue="25" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP2ATT" data-ccvalue="44" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP2DEC1" data-ccvalue="48" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP2DEC2" data-ccvalue="52" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2MUL" data-ccvalue="21" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2RSC" data-ccvalue="40" range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP2AMP2" data-ccvalue="56" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2REL" data-ccvalue="60" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2LFO" data-ccvalue="71" range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP2SSG" data-ccvalue="91" range="16" type="number" min="0" value="0" max="15"></td>
+                </tr>
+                <tr>
+                    <td>OP 3</td>
+                    <td><input id="OP3LVL" data-ccvalue="18" range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP3DET" data-ccvalue="26" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP3ATT" data-ccvalue="45" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP3DEC1" data-ccvalue="49" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP3DEC2" data-ccvalue="53" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3MUL" data-ccvalue="22" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3RSC" data-ccvalue="41" range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP3AMP2" data-ccvalue="57" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3REL" data-ccvalue="61" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3LFO" data-ccvalue="72" range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP3SSG" data-ccvalue="92" range="16" type="number" min="0" value="0" max="15"></td>
+                </tr>
+                <tr>
+                    <td>OP 4</td>
+                    <td><input id="OP4LVL" data-ccvalue="18" range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP4DET" data-ccvalue="26" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP4ATT" data-ccvalue="45" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP4DEC1" data-ccvalue="49" range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP4DEC2" data-ccvalue="53" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4MUL" data-ccvalue="22" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4RSC" data-ccvalue="41" range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP4AMP2" data-ccvalue="57" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4REL" data-ccvalue="61" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4LFO" data-ccvalue="72" range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP4SSG" data-ccvalue="92" range="16" type="number" min="0" value="0" max="15"></td>
+                </tr>                                                 
+            </table>
+            <h3>Preset slot</h3>
+            <input type="radio" name="preset" value="0" checked="checked">1
+            <input type="radio" name="preset" value="1">2
+            <input type="radio" name="preset" value="2">3
+            <input type="radio" name="preset" value="3">4
+            <input type="radio" name="preset" value="4">5
+            <input type="radio" name="preset" value="5">6
+            <input type="radio" name="preset" value="6">7
+            <input type="radio" name="preset" value="7">8
+            <input type="radio" name="preset" value="8">9
+            <input type="radio" name="preset" value="9">10
+            <h3>Controls</h3>
+            <button type="button" id="btnSavePreset">Save preset</button>
+
+        </form>
+        <script>
+            WebMidi.enable(function (err)
+            {
+                var output = WebMidi.outputs[0];
+
+                if (err) {
+                console.log("WebMidi could not be enabled.", err);
+                } else {
+                console.log("WebMidi enabled!");
+                }
+
+                console.log(WebMidi.inputs);
+                console.log(WebMidi.outputs);
+
+                var selMidiout = document.getElementById("selMidiout");
+                var option = document.createElement("option");
+
+                WebMidi.outputs.forEach(element => {
+                    selMidiout.appendChild(option);
+                    option.textContent=element.name;
+                });              
+
+                document.getElementById("selMidiout")
+                    .addEventListener('change', setMidiOutput, false);
+
+                document.getElementById("btnSavePreset")
+                    .addEventListener('click', savePreset, false);
+
+                function setMidiOutput(e)
+                {
+                    output = WebMidi.getOutputByName(e.value);
+                }
+
+                function savePreset()
+                {
+                    var elements=document.getElementsByTagName("input");
+                    for (var i=0; i<elements.length; i++)
+                    {
+                        if (typeof elements[i].getAttribute("data-ccvalue") == "string")
+                        {
+                            console.log(parseInt(elements[i].getAttribute("data-ccvalue")),parseInt(elements[i].value),parseInt(document.getElementById("midich").value));
+                            output.sendControlChange(parseInt(elements[i].getAttribute("data-ccvalue")),parseInt(elements[i].value),parseInt(document.getElementById("midich").value));
+                        }
+                        
+                    }
+                }                
+
+            });
+
+            document.getElementById('tfifile')
+                    .addEventListener('change', readSingleFile, false);
+
+            function readSingleFile(e)
+            {
+                var file = e.target.files[0];                
+                if (!file) {
+                    return;
+                }
+                var reader = new FileReader();
+                
+                reader.onload = function(e) {
+                    var arrayBuffer = reader.result;
+                    fillPresetValues(arrayBuffer);
+                }
+
+                reader.readAsArrayBuffer(file);
+            }
+
+            function fillPresetValues(arrayBuffer)
+            {
+                var data=new Int8Array(arrayBuffer);
+                console.log(data);
+                var datamap=new Array(
+                    "Algorithm","Feedback",
+                    "OP1MUL","OP1DET","OP1LVL","OP1RSC","OP1ATT","OP1DEC1","OP1DEC2","OP1REL","OP1AMP2","OP1SSG",
+                    "OP2MUL","OP2DET","OP2LVL","OP2RSC","OP2ATT","OP2DEC1","OP2DEC2","OP2REL","OP2AMP2","OP2SSG",
+                    "OP3MUL","OP3DET","OP3LVL","OP3RSC","OP3ATT","OP3DEC1","OP3DEC2","OP3REL","OP3AMP2","OP3SSG",
+                    "OP4MUL","OP4DET","OP4LVL","OP4RSC","OP4ATT","OP4DEC1","OP4DEC2","OP4REL","OP4AMP2","OP4SSG"
+                    );
+                for (var i=0; i<datamap.length; i++)
+                {
+                    document.getElementById(datamap[i]).value=data[i];
+                }
+            }
+
+
+        </script>
+    </body>
+</html>
