@@ -33,8 +33,8 @@ byte activeSettings[128];
 // Global variables
 byte fmChannel = 0;
 byte psgChannel = 0;
-bool enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
-bool enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
+bool enablePolyFM;
+bool enablePolyPSG;
 
 bool psgModLfoActive = false;
 bool psgModLfoDirectionUp = false;
@@ -115,6 +115,7 @@ void sendPresetToDevice(byte presetNo)
   //Store preset in GenMDM's RAM for faster access.
   uint8_t genMdmPresetSlot = ((128 / 16) * selectedPreset) - 1;
   RK002_sendControlChange(0, 6, genMdmPresetSlot);
+
 }
 
 // Send all presets to device
@@ -138,10 +139,12 @@ void sendAllPresetsToDevice()
       }
     }
     delay(100);
+    
     //Store preset in GenMDM's RAM for faster access.
     uint8_t genMdmPresetSlot = ((128 / 16) * (k + 1)) - 1;
     RK002_sendControlChange(0, 6, genMdmPresetSlot);
     delay(500);
+
   }
 }
 
@@ -326,6 +329,12 @@ void updatePsgModLfo()
 
 void setup()
 {
+
+  enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
+  enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
+  if (DEBUG && enablePolyFM) RK002_printf("FM Poly mode enabled");
+  if (DEBUG && enablePolyPSG) RK002_printf("PSG Poly mode enabled");
+  
   //initialize the active settings array
   for (int i=0; i<128; i++)
   {
@@ -338,7 +347,7 @@ void setup()
   polymux.setPolyphony(5); // 5 channels polymux
   psgmux.setOutputHandler(onPsgPolyMuxOutput, 0);
   psgmux.setPolyphony(3); // 3 chans for psg
-  if (recallPresetsFromFlash()) sendPresetToDevice(1);
+  if (recallPresetsFromFlash()) sendPresetToDevice(0);
 }
 
 void loop()
