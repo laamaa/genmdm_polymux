@@ -6,8 +6,10 @@ RKPolyMux psgmux;
 
 RK002_DECLARE_INFO("GenMDM poly mode", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
-RK002_DECLARE_PARAM(FMCHANNEL, 0, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 0, 0, 16, 2)
+RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
+RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
+RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 1)
+RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 
 //Enable debug messages
 #define DEBUG false
@@ -31,10 +33,12 @@ byte activeSettings[128];
 // Global variables
 byte fmChannel = 0;
 byte psgChannel = 0;
+bool enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
+bool enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
 
 bool psgModLfoActive = false;
 bool psgModLfoDirectionUp = false;
-byte psgModLfoSpeed = 50;
+byte psgModLfoSpeed = 10;
 byte psgModLfoDepth = 0;
 int psgModLfoPbValue = 0;
 unsigned long tmr_psglfo = 0;
@@ -168,7 +172,7 @@ void onPsgPolyMuxOutput(void *userarg, byte polymuxidx, byte sts, byte d1, byte 
 // Handler for ALL channel messages: used for adding messages to polymux engine
 bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 {
-
+  
   // By default, do not send the message through
   bool thru = false;
 
@@ -219,10 +223,14 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
           sendAllPresetsToDevice();
         }
 
-        // Send the CC message to all FM channels
-        for (byte i = 0; i < 5; i++) {
-          RK002_sendControlChange(i, d1, d2);
+        if (enablePolyFM)
+        {
+          // Send the CC message to all FM channels
+          for (byte i = 0; i < 5; i++) {
+            RK002_sendControlChange(i, d1, d2);
+          }
         }
+        
         break;
 
       // Note on-message, we want a simple velocity booster of sorts on this for our FM channel since the GenMDM can get really quiet with low velocities
@@ -231,6 +239,11 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         break;
       case 0xC0: //program change
         break;
+    }
+
+    if (!enablePolyFM){
+      doPoly = false;
+      thru = true;
     }
 
     if (doPoly) polymux.inputChannelMessage(sts, d1, d2);
@@ -263,9 +276,17 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
             psgModLfoDepth = 0;
             psgModLfoActive = false;
             tmr_psglfo = 0;
+            for (int i=6; i<9; i++){
+              RK002_sendPitchBend(i, 0);  
+            } 
           }
         }
         break;
+    }
+
+    if (!enablePolyPSG){
+      doPoly = false;
+      thru = true;
     }
 
     if (doPoly) psgmux.inputChannelMessage(sts, d1, d2);

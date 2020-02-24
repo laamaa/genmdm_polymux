@@ -15,6 +15,7 @@
                     </td>
                     <td>
                         <select name="midiout" id="selMidiout">
+                        </select>
                     </td>
                 </tr>
                 <tr>
@@ -26,35 +27,29 @@
                     </td>
                 </tr>
             </table>
-
-            
-            </select>
-            
-            
-
             <h3>Load TFI</h3>
             <input type="file" id="tfifile">
             <h3>Global</h3>
             <table>
                 <tr>
                     <td>Algorithm</td>
-                    <td><input id="Algorithm" data-ccvalue="14" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="Algorithm" data-ccnumber="14" data-range="8" type="number" min="0" value="0" max="7"></td>
                 </tr>
                 <tr>
                     <td>LFO FM</td>
-                    <td><input id="LFOFM" data-ccvalue="75"  range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="LFOFM" data-ccnumber="75"  data-range="8" type="number" min="0" value="0" max="7"></td>
                 </tr>                
                 <tr>
                     <td>LFO AM</td>
-                    <td><input id="LFOAM" data-ccvalue="76" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="LFOAM" data-ccnumber="76" data-range="8" type="number" min="0" value="0" max="7"></td>
                 </tr>                
                 <tr>
                     <td>Feedback</td>
-                    <td><input id="Feedback" data-ccvalue="15" range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="Feedback" data-ccnumber="15" data-range="8" type="number" min="0" value="0" max="7"></td>
                 </tr>                
                 <tr>
                     <td>Panning</td>
-                    <td><input id="Panning" data-ccvalue="77" range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="Panning" data-ccnumber="77" data-range="4" type="number" min="0" value="0" max="3"></td>
                 </tr>                
             </table>
             <h3>Operators</h3>
@@ -66,59 +61,59 @@
                 </tr>
                 <tr>
                     <td>OP 1</td>
-                    <td><input id="OP1LVL" data-ccvalue="16" range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP1DET" data-ccvalue="24" range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP1ATT" data-ccvalue="43" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP1DEC1" data-ccvalue="47" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP1DEC2" data-ccvalue="51" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1MUL" data-ccvalue="20" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1RSC" data-ccvalue="39" range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP1AMP2" data-ccvalue="55" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1REL" data-ccvalue="59" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1LFO" data-ccvalue="70" range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP1SSG" data-ccvalue="90" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1LVL" data-ccnumber="16" data-range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP1DET" data-ccnumber="24" data-range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP1ATT" data-ccnumber="43" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP1DEC1" data-ccnumber="47" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP1DEC2" data-ccnumber="51" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1MUL" data-ccnumber="20" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1RSC" data-ccnumber="39" data-range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP1AMP2" data-ccnumber="55" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1REL" data-ccnumber="59" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP1LFO" data-ccnumber="70" data-range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP1SSG" data-ccnumber="90" data-range="16" type="number" min="0" value="0" max="15"></td>
                 </tr>
                 <tr>
                     <td>OP 2</td>
-                    <td><input id="OP2LVL" data-ccvalue="17" range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP2DET" data-ccvalue="25" range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP2ATT" data-ccvalue="44" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP2DEC1" data-ccvalue="48" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP2DEC2" data-ccvalue="52" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2MUL" data-ccvalue="21" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2RSC" data-ccvalue="40" range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP2AMP2" data-ccvalue="56" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2REL" data-ccvalue="60" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2LFO" data-ccvalue="71" range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP2SSG" data-ccvalue="91" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2LVL" data-ccnumber="17" data-range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP2DET" data-ccnumber="25" data-range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP2ATT" data-ccnumber="44" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP2DEC1" data-ccnumber="48" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP2DEC2" data-ccnumber="52" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2MUL" data-ccnumber="21" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2RSC" data-ccnumber="40" data-range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP2AMP2" data-ccnumber="56" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2REL" data-ccnumber="60" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP2LFO" data-ccnumber="71" data-range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP2SSG" data-ccnumber="91" data-range="16" type="number" min="0" value="0" max="15"></td>
                 </tr>
                 <tr>
                     <td>OP 3</td>
-                    <td><input id="OP3LVL" data-ccvalue="18" range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP3DET" data-ccvalue="26" range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP3ATT" data-ccvalue="45" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP3DEC1" data-ccvalue="49" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP3DEC2" data-ccvalue="53" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3MUL" data-ccvalue="22" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3RSC" data-ccvalue="41" range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP3AMP2" data-ccvalue="57" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3REL" data-ccvalue="61" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3LFO" data-ccvalue="72" range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP3SSG" data-ccvalue="92" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3LVL" data-ccnumber="18" data-range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP3DET" data-ccnumber="26" data-range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP3ATT" data-ccnumber="45" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP3DEC1" data-ccnumber="49" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP3DEC2" data-ccnumber="53" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3MUL" data-ccnumber="22" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3RSC" data-ccnumber="41" data-range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP3AMP2" data-ccnumber="57" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3REL" data-ccnumber="61" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP3LFO" data-ccnumber="72" data-range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP3SSG" data-ccnumber="92" data-range="16" type="number" min="0" value="0" max="15"></td>
                 </tr>
                 <tr>
                     <td>OP 4</td>
-                    <td><input id="OP4LVL" data-ccvalue="18" range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP4DET" data-ccvalue="26" range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP4ATT" data-ccvalue="45" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP4DEC1" data-ccvalue="49" range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP4DEC2" data-ccvalue="53" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4MUL" data-ccvalue="22" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4RSC" data-ccvalue="41" range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP4AMP2" data-ccvalue="57" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4REL" data-ccvalue="61" range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4LFO" data-ccvalue="72" range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP4SSG" data-ccvalue="92" range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4LVL" data-ccnumber="19" data-range="128" type="number" min="0" value="0" max="127"></td>
+                    <td><input id="OP4DET" data-ccnumber="27" data-range="8" type="number" min="0" value="0" max="7"></td>
+                    <td><input id="OP4ATT" data-ccnumber="46" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP4DEC1" data-ccnumber="50" data-range="32" type="number" min="0" value="0" max="31"></td>
+                    <td><input id="OP4DEC2" data-ccnumber="54" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4MUL" data-ccnumber="23" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4RSC" data-ccnumber="42" data-range="4" type="number" min="0" value="0" max="3"></td>
+                    <td><input id="OP4AMP2" data-ccnumber="58" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4REL" data-ccnumber="62" data-range="16" type="number" min="0" value="0" max="15"></td>
+                    <td><input id="OP4LFO" data-ccnumber="73" data-range="2" type="number" min="0" value="0" max="1"></td>
+                    <td><input id="OP4SSG" data-ccnumber="93" data-range="16" type="number" min="0" value="0" max="15"></td>
                 </tr>                                                 
             </table>
             <h3>Preset slot</h3>
@@ -141,9 +136,12 @@
             {
                 var output = WebMidi.outputs[0];
 
-                if (err) {
+                if (err)
+                {
                 console.log("WebMidi could not be enabled.", err);
-                } else {
+                }
+                else
+                {
                 console.log("WebMidi enabled!");
                 }
 
@@ -151,12 +149,14 @@
                 console.log(WebMidi.outputs);
 
                 var selMidiout = document.getElementById("selMidiout");
-                var option = document.createElement("option");
+                
 
-                WebMidi.outputs.forEach(element => {
-                    selMidiout.appendChild(option);
+                WebMidi.outputs.forEach(element =>
+                {
+                    var option = document.createElement("option");
+                    selMidiout.append(option);
                     option.textContent=element.name;
-                });              
+                });       
 
                 document.getElementById("selMidiout")
                     .addEventListener('change', setMidiOutput, false);
@@ -166,21 +166,35 @@
 
                 function setMidiOutput(e)
                 {
-                    output = WebMidi.getOutputByName(e.value);
+                    console.log(e.target.value);
+                    output = WebMidi.getOutputByName(e.target.value);
                 }
 
                 function savePreset()
                 {
+                    console.log(output);
                     var elements=document.getElementsByTagName("input");
+                    var midich = parseInt(document.getElementById("midich").value);
+                    var delaytime=10;
                     for (var i=0; i<elements.length; i++)
                     {
-                        if (typeof elements[i].getAttribute("data-ccvalue") == "string")
+                        if (typeof elements[i].getAttribute("data-ccnumber") == "string")
                         {
-                            console.log(parseInt(elements[i].getAttribute("data-ccvalue")),parseInt(elements[i].value),parseInt(document.getElementById("midich").value));
-                            output.sendControlChange(parseInt(elements[i].getAttribute("data-ccvalue")),parseInt(elements[i].value),parseInt(document.getElementById("midich").value));
+                            var range = elements[i].getAttribute("data-range");
+                            var value = parseInt(elements[i].value);
+                            var ccnumber = parseInt(elements[i].getAttribute("data-ccnumber"));
+                            var ccvalue = ((value == 0) ? 0 : ((value + 1) * (128/range) - 1));
+                            console.log("Parm: " + elements[i].id, "CC: " + ccnumber, "Val: " + ccvalue, "Ch: " + midich);
+                            output.sendControlChange(ccnumber,ccvalue,midich,{time:'+'+delaytime});
                         }
-                        
+                        delaytime +=10;
                     }
+                    var presetSlot = parseInt(document.querySelector('input[name="preset"]:checked').value);
+                    console.log("Preset slot: " + presetSlot);
+                    output.sendControlChange(116,presetSlot,midich);
+                    console.log("Saving to flash");
+                    output.sendControlChange(118,1,midich,{time:'+1000'});
+                    console.log("Hopefully it's there now!");
                 }                
 
             });
@@ -217,11 +231,26 @@
                     );
                 for (var i=0; i<datamap.length; i++)
                 {
-                    document.getElementById(datamap[i]).value=data[i];
+                    //For some reason DEC2 (sustain) range is 0-31 in TFI file format, but GenMDM defines it as 0-15.
+                    switch (datamap[i]){
+                        case 'OP1DEC2':
+                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
+                            break;
+                        case 'OP2DEC2':
+                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
+                            break;
+                        case 'OP3DEC2':
+                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
+                            break;
+                        case 'OP4DEC2':
+                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
+                            break;
+                        default:                            
+                            document.getElementById(datamap[i]).value=data[i];
+                            break;
+                    }
                 }
             }
-
-
         </script>
     </body>
 </html>
