@@ -231,17 +231,19 @@
                     );
                 for (var i=0; i<datamap.length; i++)
                 {
-                    //For some reason DEC2 (sustain) range is 0-31 in TFI file format, but GenMDM defines it as 0-15.
+                    
                     switch (datamap[i]){
+						//Couldn't find any documentation how the levels are supposed to work with TFI related to Genmdm, but this is how Genajam handles it.. I trust that.
+						case 'OP1LVL':
+						case 'OP2LVL':
+						case 'OP3LVL':
+						case 'OP4LVL':
+							document.getElementById(datamap[i]).value=127-parseInt(data[i]);
+							break;
+						//For some reason DEC2 (sustain) range is 0-31 in TFI file format, but GenMDM defines it as 0-15?? o_o
                         case 'OP1DEC2':
-                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
-                            break;
                         case 'OP2DEC2':
-                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
-                            break;
                         case 'OP3DEC2':
-                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
-                            break;
                         case 'OP4DEC2':
                             document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
                             break;
