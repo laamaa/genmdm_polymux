@@ -6,10 +6,16 @@ RKPolyMux psgmux;
 
 RK002_DECLARE_INFO("GenMDM poly mode", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
-RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
+RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 3)
+RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 4)
 RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 1)
 RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
+
+/*
+ * 4CH mode: channels 1-2 are independent GenMDM channels, ch3 is a 3-polymux channel (genmdm channels 3-5)
+ * ch4 is 3-poly PSG
+ */
+RK002_DECLARE_PARAM(ENABLE4CHMODE, 1, 0, 1, 1)
 
 //Enable debug messages
 #define DEBUG false
@@ -35,6 +41,7 @@ byte fmChannel = 0;
 byte psgChannel = 0;
 bool enablePolyFM;
 bool enablePolyPSG;
+bool enable4chMode;
 
 bool psgModLfoActive = false;
 bool psgModLfoDirectionUp = false;
@@ -153,7 +160,20 @@ void sendAllPresetsToDevice()
 void onFmPolyMuxOutput(void *userarg, byte polymuxidx, byte sts, byte d1, byte d2)
 {
   byte chn = polymuxidx; // 'polymuxidx' is auto incremented by polymux
+  if (enable4chMode)
+    byte chn = 2 + polymuxidx; // 'polymuxidx' is auto incremented by polymux
+  
+  if (chn <= 15)
+  {
+    sts |= chn; // Bitwise OR: channel will be added to message type 'sts'
+    RK002_sendChannelMessage(sts, d1, d2);
+  }
+}
 
+void on4chFmPolyMuxOutput(void *userarg, byte polymuxidx, byte sts, byte d1, byte d2)
+{
+  byte chn = 2 + polymuxidx; // 'polymuxidx' is auto incremented by polymux
+  
   if (chn <= 15)
   {
     sts |= chn; // Bitwise OR: channel will be added to message type 'sts'
@@ -179,9 +199,9 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
   // By default, do not send the message through
   bool thru = false;
 
-  // FM channel handler
+  // FM channel(s) handler
   // Check if we're receiving a message on our FM channel
-  if ((sts & 0x0f) == fmChannel)
+  if ((sts & 0x0f) == fmChannel || (enable4chMode && ((sts & 0x0f) == 0 || (sts & 0x0f) == 1)))
   {
     bool doPoly = true;
 
@@ -195,7 +215,7 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         doPoly = false;
 
         // Store the message to our preset array (except if it's modwheel or preset related)
-        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != 116 && d1 != 117 && d1 != 118)
+        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != 116 && d1 != 117 && d1 != 118 && d1 != 119)
         {
           activeSettings[d1] = d2;
           if (DEBUG) RK002_printf("aS CC %d value %d",d1,d2);
@@ -224,13 +244,30 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         if (d1 == 119)
         {
           sendAllPresetsToDevice();
+          return false;
         }
 
         if (enablePolyFM)
         {
-          // Send the CC message to all FM channels
-          for (byte i = 0; i < 5; i++) {
-            RK002_sendControlChange(i, d1, d2);
+          if (!enable4chMode)
+          {
+            // Send the CC message to all 5 FM channels
+            for (byte i = 0; i < 5; i++) {
+              RK002_sendControlChange(i, d1, d2);
+            }
+          }
+          else
+          {
+            if ((sts & 0x0f) == fmChannel)
+            {
+              // Send the CC message to our poly channels 2-4
+              for (byte i = 2; i < 5; i++) {
+                RK002_sendControlChange(i, d1, d2);
+              }
+            }
+            else
+              //if we're on ch1/2, just send the message through
+              return true;
           }
         }
         
@@ -243,15 +280,20 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
       case 0xC0: //program change
         break;
     }
-
-    if (!enablePolyFM){
+        
+    if (!enablePolyFM || (enable4chMode && ((sts & 0x0f) == 0 || (sts & 0x0f) == 1)))
+    {
       doPoly = false;
       thru = true;
     }
-
-    if (doPoly) polymux.inputChannelMessage(sts, d1, d2);
+  
+    if (doPoly)
+      polymux.inputChannelMessage(sts, d1, d2);
 
   }
+  
+
+  
 
   // PSG channel handler
   // Check if we're receiving a message on our PSG channel
@@ -332,8 +374,11 @@ void setup()
 
   enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
   enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
+  enable4chMode = RK002_paramGet(ENABLE4CHMODE);
+  if (DEBUG && enable4chMode) RK002_printf("4CH mode enabled");
   if (DEBUG && enablePolyFM) RK002_printf("FM Poly mode enabled");
   if (DEBUG && enablePolyPSG) RK002_printf("PSG Poly mode enabled");
+  
   
   //initialize the active settings array
   for (int i=0; i<128; i++)
@@ -343,8 +388,16 @@ void setup()
   if (DEBUG) RK002_printf("Flashdata size %d",sizeof(flashData));
   fmChannel = (RK002_paramGet(FMCHANNEL) == 0) ? 16 : RK002_paramGet(FMCHANNEL) - 1;
   psgChannel = (RK002_paramGet(PSGCHANNEL) == 0) ? 16 : RK002_paramGet(PSGCHANNEL) - 1;
-  polymux.setOutputHandler(onFmPolyMuxOutput, 0);
-  polymux.setPolyphony(5); // 5 channels polymux
+  if (enable4chMode == 1)
+  {
+    polymux.setPolyphony(3); // 3 channels polymux for 4ch mode
+    polymux.setOutputHandler(on4chFmPolyMuxOutput, 0);
+  }
+  else
+  {
+    polymux.setPolyphony(5); // 5 channels polymux if full poly mode
+    polymux.setOutputHandler(onFmPolyMuxOutput, 0);
+  }
   psgmux.setOutputHandler(onPsgPolyMuxOutput, 0);
   psgmux.setPolyphony(3); // 3 chans for psg
   if (recallPresetsFromFlash()) sendPresetToDevice(0);
