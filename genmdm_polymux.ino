@@ -42,10 +42,8 @@ bool enablePolyFM;
 bool enablePolyPSG;
 
 bool psgModLfoActive = false;
-bool psgModLfoDirectionUp = false;
 byte psgModLfoSpeed = 10;
 byte psgModLfoDepth = 0;
-int psgModLfoPbValue = 0;
 unsigned long tmr_psglfo = 0;
 
 uint8_t selectedPreset = 0;
@@ -247,12 +245,12 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         doPoly = false;
         uint8_t genMdmPresetSlot = (8 * d1);
         if (genMdmPresetSlot == 0) genMdmPresetSlot = 1;
-          if (enablePolyFM) {
-            for (byte i = 0; i < 5; i++)
-              RK002_sendControlChange(i, 9, genMdmPresetSlot);
-          } else
-            RK002_sendControlChange((sts & 0x0f), 9, genMdmPresetSlot);
-          return false;
+        if (enablePolyFM) {
+          for (byte i = 0; i < 5; i++)
+            RK002_sendControlChange(i, 9, genMdmPresetSlot);
+        } else
+          RK002_sendControlChange((sts & 0x0f), 9, genMdmPresetSlot);
+        return false;
         break;
     }
 
@@ -292,6 +290,15 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
           }
         }
         break;
+      // Handle pitch bend messages
+      case 0xE0:
+        if (d2 == 0x40 && d1 == 0x00) {
+          if (psgModLfoDepth != 0)
+            psgModLfoActive = true;
+        } else {
+          psgModLfoActive = false;
+        }
+        break;
     }
 
     if (!enablePolyPSG) {
@@ -311,6 +318,8 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 // The PSG channel on the GenMDM does not support modwheel :( We'll work around this by generating some pitch bend messages once every few cycles
 void updatePsgModLfo()
 {  
+  static int psgModLfoPbValue = 0;
+  static bool psgModLfoDirectionUp = false;
   // Send the message if 10ms has passed since the last one
   unsigned long t_now = millis();
   if ((t_now - tmr_psglfo) >= 10) {
