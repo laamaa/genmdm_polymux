@@ -245,7 +245,9 @@
                         case 'OP2DEC2':
                         case 'OP3DEC2':
                         case 'OP4DEC2':
-                            document.getElementById(datamap[i]).value=Math.round(parseInt(data[i])/2);
+                            int dec2Value = Math.round(parseInt(data[i])/2);
+							if (dec2Value > 15) dec2Value = 15;
+							document.getElementById(datamap[i]).value=dec2Value;
                             break;
                         default:                            
                             document.getElementById(datamap[i]).value=data[i];

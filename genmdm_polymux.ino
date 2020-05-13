@@ -4,22 +4,28 @@
 RKPolyMux polymux;
 RKPolyMux psgmux;
 
-RK002_DECLARE_INFO("GenMDM poly mode", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
+RK002_DECLARE_INFO("GenMDM preset manager/poly tool", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
 RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
-RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 1)
+RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 6)
+RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 0)
 RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 
 //Enable debug messages
-#define DEBUG false
+//#define DEBUG true
 
 // Define a specific value to detect if tables are already present in RK002 memory
-#define FLASH_SIGNATURE 0xABBAACDC
+#define FLASH_SIGNATURE 0xABBA0000
 
 // Define the amount of presets to store / range of the CC #116 (Select preset slot)
 // Probably RAM and EEPROM are the things that put most limitations to this
 #define NUM_PRESETS 10
+
+// Define MIDI CC numbers
+#define CC_SELECT_PRESET_SLOT 116
+#define CC_LOAD_PRESET 117
+#define CC_STORE_IN_FLASH 118
+#define CC_SEND_ALL_TO_GENMDM 119
 
 // Define memory table structure
 struct
@@ -48,13 +54,17 @@ uint8_t selectedPreset = 0;
 // Read / initialize memory with lookup tables
 bool recallPresetsFromFlash()
 {
-  if (DEBUG) RK002_printf("recallPresetsFromFlash: Reading flash");
-  int res = RK002_readFlash(0, sizeof(flashData), (byte*)&flashData);
+  #ifdef DEBUG
+    RK002_printf("Reading flash");
+  #endif
+  uint8_t res = RK002_readFlash(0, sizeof(flashData), (byte*)&flashData);
 
   // init flash if readback failed:
-  if ((res != 0) || (flashData.signature != FLASH_SIGNATURE))
+  if (res != 0 || flashData.signature != FLASH_SIGNATURE)
   {
-    if (DEBUG) RK002_printf("recallPresetsFromFlash: Reading flash failed");    
+    #ifdef DEBUG
+      RK002_printf("Reading flash failed");
+    #endif
     uint8_t i, j;
 
     for (i = 0; i < NUM_PRESETS; i++)
@@ -66,48 +76,61 @@ bool recallPresetsFromFlash()
     }
 
     flashData.signature = FLASH_SIGNATURE;
+    return false;
   }
-  if ((res != 0) || (flashData.signature != FLASH_SIGNATURE)) return false;
-  else return true;
+  return true;
 }
 
-// Write table data to RK002 memory
+// Write preset table data to RK002 memory
 void storeAllPresetsInFlash()
 {
-  if (DEBUG) RK002_printf("-- storeAllPresetsInFlash ---");
   //put current settings to selected preset slot
   storeCurrentSettingsToPreset();
-  if (DEBUG) RK002_printf("Writing to flash");
+  #ifdef DEBUG
+    RK002_printf("Writing to flash");
+  #endif
   int res = RK002_writeFlash(0, sizeof(flashData), (byte*)&flashData);
-  if (DEBUG && res != 0) RK002_printf("Write failed");
+  #ifdef DEBUG
+    if (res != 0) RK002_printf("Write failed");
+  #endif
 
 }
 
 void storeCurrentSettingsToPreset()
 {
-  if (DEBUG) RK002_printf("-- storePreset ---");
+  #ifdef DEBUG
+    RK002_printf("Saving active settings to flashdata array");
+  #endif
   for (int i=0;i<127;i++)
   {
     flashData.preset[selectedPreset][i] = activeSettings[i];
-    if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,i,activeSettings[i]);
+    #ifdef DEBUG
+      RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,i,activeSettings[i]);
+    #endif
   }
 }
 
 // Send current preset to GenMDM, store in GenMDM RAM for faster access
-void sendPresetToDevice(byte presetNo)
+void sendPresetToDevice(byte presetNo, byte ch)
 {
-  if (DEBUG) RK002_printf("sendPresetToDevice: sending preset %d to device", selectedPreset);
+  #ifdef DEBUG
+    RK002_printf("Sending preset %02d", selectedPreset);
+  #endif
   uint8_t i, j;
 
   for (j = 0; j < 128; j++)
   {
     if (flashData.preset[presetNo][j] != 255)
     {
-      if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
+      #ifdef DEBUG
+        RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
+      #endif
       activeSettings[j] = flashData.preset[presetNo][j];
-      for (i = 0; i < 5; i++)
-      {
-        RK002_sendControlChange(i, j, flashData.preset[presetNo][j]);
+      if (enablePolyFM) {
+        for (i = 0; i < 5; i++)
+          RK002_sendControlChange(i, j, flashData.preset[presetNo][j]);
+      } else {
+        RK002_sendControlChange(ch, j, flashData.preset[presetNo][j]);
       }
     }
   }
@@ -121,30 +144,19 @@ void sendPresetToDevice(byte presetNo)
 // Send all presets to device
 void sendAllPresetsToDevice()
 {
-  uint8_t i, j, k;
-
   // Iterate through all presets and send the CCs to all of our five FM channels
-  for (k = 0; k < NUM_PRESETS; k++)
+  for (uint8_t k = 0; k < NUM_PRESETS-1; k++)
   {
-    if (DEBUG) RK002_printf("sendAllPresetsToDevice: sending preset %d to device", k);
-    for (j = 0; j < 128; j++)
-    {
-      if (flashData.preset[k][j] != 255)
-      {
-        if (DEBUG) RK002_printf("PRE: %d CC: %d VAL: %d",selectedPreset,j,flashData.preset[selectedPreset][j]);
-        for (i = 0; i < 5; i++)
-        {
-          RK002_sendControlChange(i, j, flashData.preset[k][j]);
-        }
-      }
-    }
-    delay(100);
+    #ifdef DEBUG
+      RK002_printf("SENDALL: Sending preset %d to device", k);
+    #endif
+    sendPresetToDevice(k,0);
+//    delay(100);
     
     //Store preset in GenMDM's RAM for faster access.
     uint8_t genMdmPresetSlot = ((128 / 16) * (k + 1)) - 1;
     RK002_sendControlChange(0, 6, genMdmPresetSlot);
-    delay(500);
-
+//    delay(100);
   }
 }
 
@@ -154,8 +166,7 @@ void onFmPolyMuxOutput(void *userarg, byte polymuxidx, byte sts, byte d1, byte d
 {
   byte chn = polymuxidx; // 'polymuxidx' is auto incremented by polymux
 
-  if (chn <= 15)
-  {
+  if (chn <= 15) {
     sts |= chn; // Bitwise OR: channel will be added to message type 'sts'
     RK002_sendChannelMessage(sts, d1, d2);
   }
@@ -165,8 +176,7 @@ void onPsgPolyMuxOutput(void *userarg, byte polymuxidx, byte sts, byte d1, byte 
 {
   byte chn = 6 + polymuxidx; // 'polymuxidx' is auto incremented by polymux
 
-  if (chn <= 15)
-  {
+  if (chn <= 15) {
     sts |= chn; // Bitwise OR: channel will be added to message type 'sts'
     RK002_sendChannelMessage(sts, d1, d2);
   }
@@ -181,8 +191,7 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 
   // FM channel handler
   // Check if we're receiving a message on our FM channel
-  if ((sts & 0x0f) == fmChannel)
-  {
+  if ((enablePolyFM && (sts & 0x0f) == fmChannel) || (!enablePolyFM && (sts & 0x0f) < 6)) {
     bool doPoly = true;
 
     // Check midi message type
@@ -195,39 +204,34 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         doPoly = false;
 
         // Store the message to our preset array (except if it's modwheel or preset related)
-        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != 116 && d1 != 117 && d1 != 118)
-        {
+        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != CC_SELECT_PRESET_SLOT && d1 != CC_LOAD_PRESET && d1 != CC_STORE_IN_FLASH && d1 != CC_SEND_ALL_TO_GENMDM) {
           activeSettings[d1] = d2;
-          if (DEBUG) RK002_printf("aS CC %d value %d",d1,d2);
+          #ifdef DEBUG
+            RK002_printf("aS CC %d value %d",d1,d2);
+          #endif
         }
 
-        // Select preset slot
-        if (d1 == 116)
-        {
-          if (d2 < NUM_PRESETS) selectedPreset = d2;
-          return false;
+        switch (d1) {
+          // Select preset slot
+          case CC_SELECT_PRESET_SLOT:
+            if (d2 < NUM_PRESETS) selectedPreset = d2;
+            return false;
+            break;
+          // Send currently selected preset to device
+          case CC_LOAD_PRESET:  
+            sendPresetToDevice(selectedPreset, (sts & 0x0f));
+            return false;
+            break;
+          case CC_STORE_IN_FLASH:
+            storeAllPresetsInFlash();
+            return false;
+            break;
+          case CC_SEND_ALL_TO_GENMDM:
+            sendAllPresetsToDevice();
+            return false;        
         }
 
-        // Send currently selected preset to device
-        if (d1 == 117)
-        {
-          sendPresetToDevice(selectedPreset);
-          return false;
-        }
-
-        if (d1 == 118)
-        {
-          storeAllPresetsInFlash();
-          return false;
-        }
-
-        if (d1 == 119)
-        {
-          sendAllPresetsToDevice();
-        }
-
-        if (enablePolyFM)
-        {
+        if (enablePolyFM) {
           // Send the CC message to all FM channels
           for (byte i = 0; i < 5; i++) {
             RK002_sendControlChange(i, d1, d2);
@@ -240,7 +244,20 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
       case 0x90:
         d2 = (d2 / 10) + 115;
         break;
-      case 0xC0: //program change
+        
+      //program change  
+      case 0xC0:
+        doPoly = false;
+        if (d1 > NUM_PRESETS) return false;
+          if (enablePolyFM) {
+            for (byte i = 0; i < 5; i++)
+              RK002_sendControlChange(i, 9, d1*(128/16));
+              //sendPresetToDevice(d1, (sts & 0x0f));
+          } else {
+            RK002_sendControlChange((sts & 0x0f), 9, d1*(128/16));
+            //sendPresetToDevice(d1, (sts & 0x0f));
+          }
+        
         break;
     }
 
@@ -265,34 +282,30 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
       // Handle control change messages
       case 0xB0:
         // CC1 = Modwheel
-        if (d1 == 0x01)
-        {
+        if (d1 == 0x01) {
           doPoly = false;
-          if (d2 > 0)
-          {
+          if (d2 > 0) {
             psgModLfoActive = true;
             psgModLfoDepth = d2;
             tmr_psglfo = millis();
-          }
-          else
-          {
+          } else {
             psgModLfoDepth = 0;
             psgModLfoActive = false;
             tmr_psglfo = 0;
-            for (int i=6; i<9; i++){
-              RK002_sendPitchBend(i, 0);  
-            } 
+            for (int i=6; i<9; i++)
+              RK002_sendPitchBend(i, 0);
           }
         }
         break;
     }
 
-    if (!enablePolyPSG){
+    if (!enablePolyPSG) {
       doPoly = false;
       thru = true;
     }
 
-    if (doPoly) psgmux.inputChannelMessage(sts, d1, d2);
+    if (doPoly)
+      psgmux.inputChannelMessage(sts, d1, d2);
   }
 
   return thru;
@@ -305,23 +318,19 @@ void updatePsgModLfo()
 {  
   // Do not send the message on every cycle, creates too many messages...
   unsigned long t_now = millis();
-  if ((t_now - tmr_psglfo) >= 10)
-  {
-    if (psgModLfoDirectionUp)
-    {
+  if ((t_now - tmr_psglfo) >= 10) {
+    if (psgModLfoDirectionUp) {
       psgModLfoPbValue += (psgModLfoSpeed+(psgModLfoDepth*3));
-      for (int i=6; i<9; i++){
+      for (int i=6; i<9; i++)
         RK002_sendPitchBend(i, psgModLfoPbValue);  
-      }
-      if (psgModLfoPbValue > psgModLfoDepth*10) psgModLfoDirectionUp = false;
-    }
-    else
-    {
+      if (psgModLfoPbValue > psgModLfoDepth*10)
+        psgModLfoDirectionUp = false;
+    } else {
       psgModLfoPbValue -= (psgModLfoSpeed+(psgModLfoDepth*3));
-      for (int i=6; i<9; i++){
-        RK002_sendPitchBend(i, psgModLfoPbValue);  
-      }
-      if (-psgModLfoPbValue > psgModLfoDepth*10) psgModLfoDirectionUp = true;
+      for (int i=6; i<9; i++)
+        RK002_sendPitchBend(i, psgModLfoPbValue);
+      if (-psgModLfoPbValue > psgModLfoDepth*10)
+        psgModLfoDirectionUp = true;
     }
     tmr_psglfo = millis();
   }
@@ -329,25 +338,36 @@ void updatePsgModLfo()
 
 void setup()
 {
-
   enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
   enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
-  if (DEBUG && enablePolyFM) RK002_printf("FM Poly mode enabled");
-  if (DEBUG && enablePolyPSG) RK002_printf("PSG Poly mode enabled");
+  #ifdef DEBUG
+    if (enablePolyFM) RK002_printf("FM Poly mode enabled");
+    if (enablePolyPSG) RK002_printf("PSG Poly mode enabled");
+  #endif
   
   //initialize the active settings array
   for (int i=0; i<128; i++)
-  {
     activeSettings[i] = 255;
-  }
-  if (DEBUG) RK002_printf("Flashdata size %d",sizeof(flashData));
+  #ifdef DEBUG
+    RK002_printf("Flashdata size %d",sizeof(flashData));
+  #endif
   fmChannel = (RK002_paramGet(FMCHANNEL) == 0) ? 16 : RK002_paramGet(FMCHANNEL) - 1;
   psgChannel = (RK002_paramGet(PSGCHANNEL) == 0) ? 16 : RK002_paramGet(PSGCHANNEL) - 1;
-  polymux.setOutputHandler(onFmPolyMuxOutput, 0);
-  polymux.setPolyphony(5); // 5 channels polymux
+  if (enablePolyFM) {
+    polymux.setOutputHandler(onFmPolyMuxOutput, 0);
+    polymux.setPolyphony(5); // 5 channels polymux
+  }
   psgmux.setOutputHandler(onPsgPolyMuxOutput, 0);
   psgmux.setPolyphony(3); // 3 chans for psg
-  if (recallPresetsFromFlash()) sendPresetToDevice(0);
+  if (recallPresetsFromFlash()) {
+    sendAllPresetsToDevice();
+    sendPresetToDevice(0,0);
+    //If polyFM isn't enabled, we need to send the preset to all channels
+    if (!enablePolyFM) {
+      for (int i=1; i<6; i++)
+        sendPresetToDevice(0,i);
+    }
+  }
 }
 
 void loop()
