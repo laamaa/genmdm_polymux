@@ -15,11 +15,11 @@ RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 //#define DEBUG true
 
 // Define a specific value to detect if tables are already present in RK002 memory
-#define FLASH_SIGNATURE 0xABBA0000
+#define FLASH_SIGNATURE 0xABBAACDC
 
 // Define the amount of presets to store / range of the CC #116 (Select preset slot)
 // Probably RAM and EEPROM are the things that put most limitations to this
-#define NUM_PRESETS 10
+#define NUM_PRESETS 16
 
 // Define MIDI CC numbers
 #define CC_SELECT_PRESET_SLOT 116
@@ -28,8 +28,7 @@ RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 #define CC_SEND_ALL_TO_GENMDM 119
 
 // Define memory table structure
-struct
-{
+struct {
   uint32_t signature;
   byte preset[NUM_PRESETS][128];
 } flashData;
@@ -60,20 +59,13 @@ bool recallPresetsFromFlash()
   uint8_t res = RK002_readFlash(0, sizeof(flashData), (byte*)&flashData);
 
   // init flash if readback failed:
-  if (res != 0 || flashData.signature != FLASH_SIGNATURE)
-  {
+  if (res != 0 || flashData.signature != FLASH_SIGNATURE) {
     #ifdef DEBUG
       RK002_printf("Reading flash failed");
     #endif
-    uint8_t i, j;
 
-    for (i = 0; i < NUM_PRESETS; i++)
-    {
-      for (j = 0; j < 128; j++)
-      {
-        flashData.preset[i][j] = 255;
-      }
-    }
+    //set all values as 255 = do not transmit
+    memset(flashData.preset, 255, sizeof(flashData.preset));
 
     flashData.signature = FLASH_SIGNATURE;
     return false;
@@ -84,7 +76,7 @@ bool recallPresetsFromFlash()
 // Write preset table data to RK002 memory
 void storeAllPresetsInFlash()
 {
-  //put current settings to selected preset slot
+  // Put current settings to selected preset slot
   storeCurrentSettingsToPreset();
   #ifdef DEBUG
     RK002_printf("Writing to flash");
@@ -116,9 +108,8 @@ void sendPresetToDevice(byte presetNo, byte ch)
   #ifdef DEBUG
     RK002_printf("Sending preset %02d", selectedPreset);
   #endif
-  uint8_t i, j;
 
-  for (j = 0; j < 128; j++)
+  for (uint8_t j = 0; j < 128; j++)
   {
     if (flashData.preset[presetNo][j] != 255)
     {
@@ -127,7 +118,8 @@ void sendPresetToDevice(byte presetNo, byte ch)
       #endif
       activeSettings[j] = flashData.preset[presetNo][j];
       if (enablePolyFM) {
-        for (i = 0; i < 5; i++)
+        //Send preset to all 5 FM channels if Polymux is enabled
+        for (uint8_t i = 0; i < 5; i++)
           RK002_sendControlChange(i, j, flashData.preset[presetNo][j]);
       } else {
         RK002_sendControlChange(ch, j, flashData.preset[presetNo][j]);
@@ -135,8 +127,9 @@ void sendPresetToDevice(byte presetNo, byte ch)
     }
   }
 
-  //Store preset in GenMDM's RAM for faster access.
-  uint8_t genMdmPresetSlot = ((128 / 16) * selectedPreset) - 1;
+  // Store preset in GenMDM's RAM for faster access.
+  uint8_t genMdmPresetSlot = (8 * presetNo);
+  if (genMdmPresetSlot == 0) genMdmPresetSlot = 1;
   RK002_sendControlChange(0, 6, genMdmPresetSlot);
 
 }
@@ -145,18 +138,12 @@ void sendPresetToDevice(byte presetNo, byte ch)
 void sendAllPresetsToDevice()
 {
   // Iterate through all presets and send the CCs to all of our five FM channels
-  for (uint8_t k = 0; k < NUM_PRESETS-1; k++)
-  {
+  for (uint8_t k = 0; k < NUM_PRESETS-1; k++) {
     #ifdef DEBUG
       RK002_printf("SENDALL: Sending preset %d to device", k);
     #endif
     sendPresetToDevice(k,0);
-//    delay(100);
-    
-    //Store preset in GenMDM's RAM for faster access.
-    uint8_t genMdmPresetSlot = ((128 / 16) * (k + 1)) - 1;
-    RK002_sendControlChange(0, 6, genMdmPresetSlot);
-//    delay(100);
+    delay(100);
   }
 }
 
@@ -203,39 +190,48 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         // Do not send the message to Polymux processor
         doPoly = false;
 
-        // Store the message to our preset array (except if it's modwheel or preset related)
-        if (d1 != 1 && d1 != 6 && d1 != 9 && d1 != CC_SELECT_PRESET_SLOT && d1 != CC_LOAD_PRESET && d1 != CC_STORE_IN_FLASH && d1 != CC_SEND_ALL_TO_GENMDM) {
-          activeSettings[d1] = d2;
-          #ifdef DEBUG
-            RK002_printf("aS CC %d value %d",d1,d2);
-          #endif
-        }
-
         switch (d1) {
+          
           // Select preset slot
           case CC_SELECT_PRESET_SLOT:
             if (d2 < NUM_PRESETS) selectedPreset = d2;
             return false;
             break;
+            
           // Send currently selected preset to device
           case CC_LOAD_PRESET:  
             sendPresetToDevice(selectedPreset, (sts & 0x0f));
             return false;
             break;
+          
+          // Store the preset array's current state in RK002 flash.
           case CC_STORE_IN_FLASH:
             storeAllPresetsInFlash();
             return false;
             break;
+          
+          // Send all presets to GenMDM. Not sure if this actually needs to be a CC...
           case CC_SEND_ALL_TO_GENMDM:
             sendAllPresetsToDevice();
-            return false;        
+            return false;
+            break;
+          
+          // GenMDM RAM preset store/recall. We do not want to store these settings, just let them pass through.  
+          case 6:
+          case 9:
+            break;
+          default:
+            activeSettings[d1] = d2;
+            #ifdef DEBUG
+              RK002_printf("aS CC %d value %d",d1,d2);
+            #endif          
+            break;        
         }
 
         if (enablePolyFM) {
           // Send the CC message to all FM channels
-          for (byte i = 0; i < 5; i++) {
+          for (byte i = 0; i < 5; i++)
             RK002_sendControlChange(i, d1, d2);
-          }
         }
         
         break;
@@ -245,23 +241,22 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         d2 = (d2 / 10) + 115;
         break;
         
-      //program change  
+      // Program change, convert the message to GenMDM's internal RAM preset recall CC message
       case 0xC0:
+        if (d1 >= NUM_PRESETS) return false;
         doPoly = false;
-        if (d1 > NUM_PRESETS) return false;
+        uint8_t genMdmPresetSlot = (8 * d1);
+        if (genMdmPresetSlot == 0) genMdmPresetSlot = 1;
           if (enablePolyFM) {
             for (byte i = 0; i < 5; i++)
-              RK002_sendControlChange(i, 9, d1*(128/16));
-              //sendPresetToDevice(d1, (sts & 0x0f));
-          } else {
-            RK002_sendControlChange((sts & 0x0f), 9, d1*(128/16));
-            //sendPresetToDevice(d1, (sts & 0x0f));
-          }
-        
+              RK002_sendControlChange(i, 9, genMdmPresetSlot);
+          } else
+            RK002_sendControlChange((sts & 0x0f), 9, genMdmPresetSlot);
+          return false;
         break;
     }
 
-    if (!enablePolyFM){
+    if (!enablePolyFM) {
       doPoly = false;
       thru = true;
     }
@@ -316,7 +311,7 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 // The PSG channel on the GenMDM does not support modwheel :( We'll work around this by generating some pitch bend messages once every few cycles
 void updatePsgModLfo()
 {  
-  // Do not send the message on every cycle, creates too many messages...
+  // Send the message if 10ms has passed since the last one
   unsigned long t_now = millis();
   if ((t_now - tmr_psglfo) >= 10) {
     if (psgModLfoDirectionUp) {
@@ -346,8 +341,7 @@ void setup()
   #endif
   
   //initialize the active settings array
-  for (int i=0; i<128; i++)
-    activeSettings[i] = 255;
+  memset(activeSettings,255,sizeof(activeSettings));
   #ifdef DEBUG
     RK002_printf("Flashdata size %d",sizeof(flashData));
   #endif
@@ -361,11 +355,12 @@ void setup()
   psgmux.setPolyphony(3); // 3 chans for psg
   if (recallPresetsFromFlash()) {
     sendAllPresetsToDevice();
-    sendPresetToDevice(0,0);
+    // Load preset 1 from RAM (GenMDM CC #9)
+    RK002_sendControlChange(0, 9, 1);
     //If polyFM isn't enabled, we need to send the preset to all channels
     if (!enablePolyFM) {
       for (int i=1; i<6; i++)
-        sendPresetToDevice(0,i);
+        RK002_sendControlChange(i, 9, 1);
     }
   }
 }

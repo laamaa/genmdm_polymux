@@ -6,157 +6,164 @@
     </head>
     <body>
         <h1>genmdm_polymux TFI tool</h1>
-        <form>
-            <h3>Settings</h3>
-            <table>
-                <tr>
-                    <td>
-                        <label for="midiout">MIDI out port: </label>
-                    </td>
-                    <td>
-                        <select name="midiout" id="selMidiout">
-                        </select>
-                    </td>
-                </tr>
-                <tr>
-                    <td>
-                        <label for="midich">MIDI channel: </label>    
-                    </td>
-                    <td>
-                        <input id="midich" type="number" min="1" max="16" value="1">
-                    </td>
-                </tr>
-            </table>
-            <h3>Load TFI</h3>
-            <input type="file" id="tfifile">
-            <h3>Global</h3>
-            <table>
-                <tr>
-                    <td>Algorithm</td>
-                    <td><input id="Algorithm" data-ccnumber="14" data-range="8" type="number" min="0" value="0" max="7"></td>
-                </tr>
-                <tr>
-                    <td>LFO FM</td>
-                    <td><input id="LFOFM" data-ccnumber="75"  data-range="8" type="number" min="0" value="0" max="7"></td>
-                </tr>                
-                <tr>
-                    <td>LFO AM</td>
-                    <td><input id="LFOAM" data-ccnumber="76" data-range="8" type="number" min="0" value="0" max="7"></td>
-                </tr>                
-                <tr>
-                    <td>Feedback</td>
-                    <td><input id="Feedback" data-ccnumber="15" data-range="8" type="number" min="0" value="0" max="7"></td>
-                </tr>                
-                <tr>
-                    <td>Panning</td>
-                    <td><input id="Panning" data-ccnumber="77" data-range="4" type="number" min="0" value="3" max="3"></td>
-                </tr>                
-            </table>
-            <h3>Operators</h3>
-            <table>
-                <tr>
-                    <th>
-                        <td>LVL</td><td>DET</td><td>ATT</td><td>DEC1</td><td>DEC2</td><td>MUL</td><td>RSC</td><td>AMP2</td><td>REL</td><td>LFO</td><td>SSG</td>
-                    </th>
-                </tr>
-                <tr>
-                    <td>OP 1</td>
-                    <td><input id="OP1LVL" data-ccnumber="16" data-range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP1DET" data-ccnumber="24" data-range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP1ATT" data-ccnumber="43" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP1DEC1" data-ccnumber="47" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP1DEC2" data-ccnumber="51" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1MUL" data-ccnumber="20" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1RSC" data-ccnumber="39" data-range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP1AMP2" data-ccnumber="55" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1REL" data-ccnumber="59" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP1LFO" data-ccnumber="70" data-range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP1SSG" data-ccnumber="90" data-range="16" type="number" min="0" value="0" max="15"></td>
-                </tr>
-                <tr>
-                    <td>OP 2</td>
-                    <td><input id="OP2LVL" data-ccnumber="17" data-range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP2DET" data-ccnumber="25" data-range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP2ATT" data-ccnumber="44" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP2DEC1" data-ccnumber="48" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP2DEC2" data-ccnumber="52" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2MUL" data-ccnumber="21" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2RSC" data-ccnumber="40" data-range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP2AMP2" data-ccnumber="56" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2REL" data-ccnumber="60" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP2LFO" data-ccnumber="71" data-range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP2SSG" data-ccnumber="91" data-range="16" type="number" min="0" value="0" max="15"></td>
-                </tr>
-                <tr>
-                    <td>OP 3</td>
-                    <td><input id="OP3LVL" data-ccnumber="18" data-range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP3DET" data-ccnumber="26" data-range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP3ATT" data-ccnumber="45" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP3DEC1" data-ccnumber="49" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP3DEC2" data-ccnumber="53" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3MUL" data-ccnumber="22" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3RSC" data-ccnumber="41" data-range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP3AMP2" data-ccnumber="57" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3REL" data-ccnumber="61" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP3LFO" data-ccnumber="72" data-range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP3SSG" data-ccnumber="92" data-range="16" type="number" min="0" value="0" max="15"></td>
-                </tr>
-                <tr>
-                    <td>OP 4</td>
-                    <td><input id="OP4LVL" data-ccnumber="19" data-range="128" type="number" min="0" value="0" max="127"></td>
-                    <td><input id="OP4DET" data-ccnumber="27" data-range="8" type="number" min="0" value="0" max="7"></td>
-                    <td><input id="OP4ATT" data-ccnumber="46" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP4DEC1" data-ccnumber="50" data-range="32" type="number" min="0" value="0" max="31"></td>
-                    <td><input id="OP4DEC2" data-ccnumber="54" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4MUL" data-ccnumber="23" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4RSC" data-ccnumber="42" data-range="4" type="number" min="0" value="0" max="3"></td>
-                    <td><input id="OP4AMP2" data-ccnumber="58" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4REL" data-ccnumber="62" data-range="16" type="number" min="0" value="0" max="15"></td>
-                    <td><input id="OP4LFO" data-ccnumber="73" data-range="2" type="number" min="0" value="0" max="1"></td>
-                    <td><input id="OP4SSG" data-ccnumber="93" data-range="16" type="number" min="0" value="0" max="15"></td>
-                </tr>                                                 
-            </table>
-            <h3>Preset slot</h3>
-            <input type="radio" name="preset" value="0" checked="checked">1
-            <input type="radio" name="preset" value="1">2
-            <input type="radio" name="preset" value="2">3
-            <input type="radio" name="preset" value="3">4
-            <input type="radio" name="preset" value="4">5
-            <input type="radio" name="preset" value="5">6
-            <input type="radio" name="preset" value="6">7
-            <input type="radio" name="preset" value="7">8
-            <input type="radio" name="preset" value="8">9
-            <input type="radio" name="preset" value="9">10
-            <h3>Controls</h3>
-            <button type="button" id="btnSavePreset">Save preset</button>
+		<div style="float:left; margin-right: 20px;">
+			<form>
+				<h3>Settings</h3>
+				<table>
+					<tr>
+						<td>
+							<label for="midiout">MIDI out port: </label>
+						</td>
+						<td>
+							<select name="midiout" id="selMidiout">
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>
+							<label for="midich">MIDI channel: </label>
+						</td>
+						<td>
+							<input id="midich" type="number" min="1" max="16" value="1">
+						</td>
+					</tr>
+				</table>
+				<h3>Load TFI</h3>
+				<input type="file" id="tfifile">
+				<h3>Global</h3>
+				<table>
+					<tr>
+						<td>Algorithm</td>
+						<td><input id="Algorithm" data-ccnumber="14" data-range="8" type="number" min="0" value="0" max="7"></td>
+					</tr>
+					<tr>
+						<td>LFO FM</td>
+						<td><input id="LFOFM" data-ccnumber="75"  data-range="8" type="number" min="0" value="0" max="7"></td>
+					</tr>
+					<tr>
+						<td>LFO AM</td>
+						<td><input id="LFOAM" data-ccnumber="76" data-range="8" type="number" min="0" value="0" max="7"></td>
+					</tr>
+					<tr>
+						<td>Feedback</td>
+						<td><input id="Feedback" data-ccnumber="15" data-range="8" type="number" min="0" value="0" max="7"></td>
+					</tr>
+					<tr>
+						<td>Panning</td>
+						<td><input id="Panning" data-ccnumber="77" data-range="4" type="number" min="0" value="3" max="3"></td>
+					</tr>
+				</table>
+				<h3>Operators</h3>
+				<table>
+					<tr>
+						<th>
+							<td>LVL</td><td>DET</td><td>ATT</td><td>DEC1</td><td>DEC2</td><td>MUL</td><td>RSC</td><td>AMP2</td><td>REL</td><td>LFO</td><td>SSG</td>
+						</th>
+					</tr>
+					<tr>
+						<td>OP 1</td>
+						<td><input id="OP1LVL" data-ccnumber="16" data-range="128" type="number" min="0" value="0" max="127"></td>
+						<td><input id="OP1DET" data-ccnumber="24" data-range="8" type="number" min="0" value="0" max="7"></td>
+						<td><input id="OP1ATT" data-ccnumber="43" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP1DEC1" data-ccnumber="47" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP1DEC2" data-ccnumber="51" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP1MUL" data-ccnumber="20" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP1RSC" data-ccnumber="39" data-range="4" type="number" min="0" value="0" max="3"></td>
+						<td><input id="OP1AMP2" data-ccnumber="55" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP1REL" data-ccnumber="59" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP1LFO" data-ccnumber="70" data-range="2" type="number" min="0" value="0" max="1"></td>
+						<td><input id="OP1SSG" data-ccnumber="90" data-range="16" type="number" min="0" value="0" max="15"></td>
+					</tr>
+					<tr>
+						<td>OP 2</td>
+						<td><input id="OP2LVL" data-ccnumber="17" data-range="128" type="number" min="0" value="0" max="127"></td>
+						<td><input id="OP2DET" data-ccnumber="25" data-range="8" type="number" min="0" value="0" max="7"></td>
+						<td><input id="OP2ATT" data-ccnumber="44" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP2DEC1" data-ccnumber="48" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP2DEC2" data-ccnumber="52" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP2MUL" data-ccnumber="21" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP2RSC" data-ccnumber="40" data-range="4" type="number" min="0" value="0" max="3"></td>
+						<td><input id="OP2AMP2" data-ccnumber="56" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP2REL" data-ccnumber="60" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP2LFO" data-ccnumber="71" data-range="2" type="number" min="0" value="0" max="1"></td>
+						<td><input id="OP2SSG" data-ccnumber="91" data-range="16" type="number" min="0" value="0" max="15"></td>
+					</tr>
+					<tr>
+						<td>OP 3</td>
+						<td><input id="OP3LVL" data-ccnumber="18" data-range="128" type="number" min="0" value="0" max="127"></td>
+						<td><input id="OP3DET" data-ccnumber="26" data-range="8" type="number" min="0" value="0" max="7"></td>
+						<td><input id="OP3ATT" data-ccnumber="45" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP3DEC1" data-ccnumber="49" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP3DEC2" data-ccnumber="53" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP3MUL" data-ccnumber="22" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP3RSC" data-ccnumber="41" data-range="4" type="number" min="0" value="0" max="3"></td>
+						<td><input id="OP3AMP2" data-ccnumber="57" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP3REL" data-ccnumber="61" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP3LFO" data-ccnumber="72" data-range="2" type="number" min="0" value="0" max="1"></td>
+						<td><input id="OP3SSG" data-ccnumber="92" data-range="16" type="number" min="0" value="0" max="15"></td>
+					</tr>
+					<tr>
+						<td>OP 4</td>
+						<td><input id="OP4LVL" data-ccnumber="19" data-range="128" type="number" min="0" value="0" max="127"></td>
+						<td><input id="OP4DET" data-ccnumber="27" data-range="8" type="number" min="0" value="0" max="7"></td>
+						<td><input id="OP4ATT" data-ccnumber="46" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP4DEC1" data-ccnumber="50" data-range="32" type="number" min="0" value="0" max="31"></td>
+						<td><input id="OP4DEC2" data-ccnumber="54" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP4MUL" data-ccnumber="23" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP4RSC" data-ccnumber="42" data-range="4" type="number" min="0" value="0" max="3"></td>
+						<td><input id="OP4AMP2" data-ccnumber="58" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP4REL" data-ccnumber="62" data-range="16" type="number" min="0" value="0" max="15"></td>
+						<td><input id="OP4LFO" data-ccnumber="73" data-range="2" type="number" min="0" value="0" max="1"></td>
+						<td><input id="OP4SSG" data-ccnumber="93" data-range="16" type="number" min="0" value="0" max="15"></td>
+					</tr>
+				</table>
+				<h3>Preset slot</h3>
+				<input type="radio" name="preset" value="0" checked="checked">1
+				<input type="radio" name="preset" value="1">2
+				<input type="radio" name="preset" value="2">3
+				<input type="radio" name="preset" value="3">4
+				<input type="radio" name="preset" value="4">5
+				<input type="radio" name="preset" value="5">6
+				<input type="radio" name="preset" value="6">7
+				<input type="radio" name="preset" value="7">8
+				<input type="radio" name="preset" value="8">9
+				<input type="radio" name="preset" value="9">10
+				<input type="radio" name="preset" value="10">11
+				<input type="radio" name="preset" value="11">12
+				<input type="radio" name="preset" value="12">13
+				<input type="radio" name="preset" value="13">14
+				<input type="radio" name="preset" value="14">15
+				<input type="radio" name="preset" value="15">16
 
-        </form>
+				<h3>Controls</h3>
+				<button type="button" id="btnPreview">Preview</button>
+				<button type="button" id="btnSavePreset">Save to flash</button>
+			</form>
+		</div>
+		<div>
+			<h3>Log</h3>
+			<textarea id="msglog" rows="40" cols="60"></textarea>
+		</div>
         <script>
+			"use strict";
             WebMidi.enable(function (err)
             {
                 var output = WebMidi.outputs[0];
 
                 if (err)
-                {
-                console.log("WebMidi could not be enabled.", err);
-                }
+					document.getElementById("msglog").value += ("WebMidi could not be enabled.\n", err);
                 else
-                {
-                console.log("WebMidi enabled!");
-                }
-
-                console.log(WebMidi.inputs);
-                console.log(WebMidi.outputs);
+					document.getElementById("msglog").value += ("WebMidi enabled!\n");
 
                 var selMidiout = document.getElementById("selMidiout");
-                
+
 
                 WebMidi.outputs.forEach(element =>
                 {
                     var option = document.createElement("option");
                     selMidiout.append(option);
                     option.textContent=element.name;
-                });       
+                });
 
                 document.getElementById("selMidiout")
                     .addEventListener('change', setMidiOutput, false);
@@ -164,38 +171,51 @@
                 document.getElementById("btnSavePreset")
                     .addEventListener('click', savePreset, false);
 
+				document.getElementById("btnPreview")
+					.addEventListener('click', previewPreset, false);
+
                 function setMidiOutput(e)
                 {
-                    console.log(e.target.value);
                     output = WebMidi.getOutputByName(e.target.value);
+					document.getElementById("msglog").value += "MIDI out set to: " + (e.target.value) + "\n";
                 }
 
-                function savePreset()
-                {
-                    console.log(output);
+				function sendPresetData()
+				{
+					document.getElementById("msglog").value += ("Sending preset data\n");
                     var elements=document.getElementsByTagName("input");
                     var midich = parseInt(document.getElementById("midich").value);
                     var delaytime=10;
-                    for (var i=0; i<elements.length; i++)
-                    {
-                        if (typeof elements[i].getAttribute("data-ccnumber") == "string")
-                        {
+                    for (var i=0; i<elements.length; i++) {
+                        if (typeof elements[i].getAttribute("data-ccnumber") == "string") {
                             var range = elements[i].getAttribute("data-range");
                             var value = parseInt(elements[i].value);
                             var ccnumber = parseInt(elements[i].getAttribute("data-ccnumber"));
                             var ccvalue = ((value == 0) ? 0 : ((value + 1) * (128/range) - 1));
-                            console.log("Parm: " + elements[i].id, "CC: " + ccnumber, "Val: " + ccvalue, "Ch: " + midich);
                             output.sendControlChange(ccnumber,ccvalue,midich,{time:'+'+delaytime});
                         }
                         delaytime +=10;
                     }
+				}
+
+                function savePreset()
+                {
+					sendPresetData();
                     var presetSlot = parseInt(document.querySelector('input[name="preset"]:checked').value);
-                    console.log("Preset slot: " + presetSlot);
+                    document.getElementById("msglog").value += ("Preset slot: " + presetSlot + "\n");
                     output.sendControlChange(116,presetSlot,midich);
-                    console.log("Saving to flash");
+                    document.getElementById("msglog").value += ("Saving to flash\n");
                     output.sendControlChange(118,1,midich,{time:'+1000'});
-                    console.log("Hopefully it's there now!");
-                }                
+                    document.getElementById("msglog").value += ("Hopefully it's there now! :--)\n");
+                }
+
+				function previewPreset()
+				{
+					sendPresetData();
+					document.getElementById("msglog").value += ("Playing note C4\n");
+					var midich = parseInt(document.getElementById("midich").value);
+					output.playNote("C4", midich, {duration: 2000, velocity: 1, time: WebMidi.time + 1000});
+				}
 
             });
 
@@ -204,12 +224,12 @@
 
             function readSingleFile(e)
             {
-                var file = e.target.files[0];                
+                var file = e.target.files[0];
                 if (!file) {
                     return;
                 }
                 var reader = new FileReader();
-                
+
                 reader.onload = function(e) {
                     var arrayBuffer = reader.result;
                     fillPresetValues(arrayBuffer);
@@ -229,9 +249,7 @@
                     "OP3MUL","OP3DET","OP3LVL","OP3RSC","OP3ATT","OP3DEC1","OP3DEC2","OP3REL","OP3AMP2","OP3SSG",
                     "OP4MUL","OP4DET","OP4LVL","OP4RSC","OP4ATT","OP4DEC1","OP4DEC2","OP4REL","OP4AMP2","OP4SSG"
                     );
-                for (var i=0; i<datamap.length; i++)
-                {
-                    
+                for (var i=0; i<datamap.length; i++) {
                     switch (datamap[i]){
 						//Couldn't find any documentation how the levels are supposed to work with TFI related to Genmdm, but this is how Genajam handles it.. I trust that.
 						case 'OP1LVL':
@@ -245,11 +263,11 @@
                         case 'OP2DEC2':
                         case 'OP3DEC2':
                         case 'OP4DEC2':
-                            int dec2Value = Math.round(parseInt(data[i])/2);
+                            var dec2Value = Math.round(parseInt(data[i])/2);
 							if (dec2Value > 15) dec2Value = 15;
 							document.getElementById(datamap[i]).value=dec2Value;
                             break;
-                        default:                            
+                        default:
                             document.getElementById(datamap[i]).value=data[i];
                             break;
                     }
