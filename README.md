@@ -19,5 +19,4 @@ I've used this successfully with the included TouchOSC layout.
 * Setup a decent default sound of your liking and click through each of the preset slots, pressing save after switching slots.
 * Now you should be able to create your killer sounds to your preset slots without too many troubles.
 
-Todo: 
-* Webmidi TFI import tool
+There's also a simple html/javascript webmidi tool available for importing .TFI presets. It should work with Chrome.
