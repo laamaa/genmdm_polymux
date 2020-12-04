@@ -7,19 +7,19 @@ RKPolyMux psgmux;
 RK002_DECLARE_INFO("GenMDM preset manager/poly tool", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
 RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 6)
-RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 0)
+RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
+RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 1)
 RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 
 //Enable debug messages
 //#define DEBUG true
 
 // Define a specific value to detect if tables are already present in RK002 memory
-#define FLASH_SIGNATURE 0xABBAACDC
+#define FLASH_SIGNATURE 0xABBAABBA
 
 // Define the amount of presets to store / range of the CC #116 (Select preset slot)
 // Probably RAM and EEPROM are the things that put most limitations to this
-#define NUM_PRESETS 16
+#define NUM_PRESETS 15
 
 // Define MIDI CC numbers
 #define CC_SELECT_PRESET_SLOT 116
@@ -272,6 +272,11 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
 
     // Check MIDI message type
     switch (sts & 0xf0) {
+      // Note on-message, we want a simple velocity booster of sorts on this for our PSG channel since the GenMDM can get really quiet with low velocities
+      case 0x90:
+        d2 = (d2 / 10) + 115;
+        break;
+      
       // Handle control change messages
       case 0xB0:
         // CC1 = Modwheel
