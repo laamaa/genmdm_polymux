@@ -1,6 +1,7 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
+		<meta charset="utf-8"/>
         <title>genmdm_polymux TFI tool</title>
         <script src="https://cdn.jsdelivr.net/npm/webmidi"></script>
     </head>
@@ -185,7 +186,7 @@
 					document.getElementById("msglog").value += ("Sending preset data\n");
                     var elements=document.getElementsByTagName("input");
                     var midich = parseInt(document.getElementById("midich").value);
-                    var delaytime=10;
+                    var delaytime=20;
                     for (var i=0; i<elements.length; i++) {
                         if (typeof elements[i].getAttribute("data-ccnumber") == "string") {
                             var range = elements[i].getAttribute("data-range");
@@ -194,19 +195,28 @@
                             var ccvalue = ((value == 0) ? 0 : ((value + 1) * (128/range) - 1));
                             output.sendControlChange(ccnumber,ccvalue,midich,{time:'+'+delaytime});
                         }
-                        delaytime +=10;
+                        delaytime +=20;
                     }
 				}
 
                 function savePreset()
                 {
 					sendPresetData();
-                    var presetSlot = parseInt(document.querySelector('input[name="preset"]:checked').value);
-                    document.getElementById("msglog").value += ("Preset slot: " + presetSlot + "\n");
-                    output.sendControlChange(116,presetSlot,midich);
-                    document.getElementById("msglog").value += ("Saving to flash\n");
-                    output.sendControlChange(118,1,midich,{time:'+1000'});
-                    document.getElementById("msglog").value += ("Hopefully it's there now! :--)\n");
+					
+					var midich = parseInt(document.getElementById("midich").value);
+					
+					const sleep = (milliseconds) => {
+						return new Promise(resolve => setTimeout(resolve, milliseconds))
+					}
+
+					sleep(1000).then(() => {
+						var presetSlot = parseInt(document.querySelector('input[name="preset"]:checked').value);
+						document.getElementById("msglog").value += ("Preset slot: " + presetSlot + "\n");
+						output.sendControlChange(116,presetSlot,midich);
+						document.getElementById("msglog").value += ("Saving to flash\n");
+						output.sendControlChange(118,1,midich,{time:'+1000'});
+						document.getElementById("msglog").value += ("Hopefully it's there now! :--)\n");
+					})
                 }
 
 				function previewPreset()

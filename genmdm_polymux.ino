@@ -6,8 +6,8 @@ RKPolyMux psgmux;
 
 RK002_DECLARE_INFO("GenMDM preset manager/poly tool", "jonne.kokkonen@gmail.com", "1.0", "c89a53fe-841f-436f-83c7-b0db1023bf9c");
 
-RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 1)
-RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 2)
+RK002_DECLARE_PARAM(FMCHANNEL, 1, 0, 16, 3)
+RK002_DECLARE_PARAM(PSGCHANNEL, 1, 0, 16, 4)
 RK002_DECLARE_PARAM(ENABLEPOLYFM, 1, 0, 1, 1)
 RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 
@@ -15,11 +15,11 @@ RK002_DECLARE_PARAM(ENABLEPOLYPSG, 1, 0, 1, 1)
 //#define DEBUG true
 
 // Define a specific value to detect if tables are already present in RK002 memory
-#define FLASH_SIGNATURE 0xABBAABBA
+#define FLASH_SIGNATURE 0xFAFAFAFA
 
 // Define the amount of presets to store / range of the CC #116 (Select preset slot)
 // Probably RAM and EEPROM are the things that put most limitations to this
-#define NUM_PRESETS 15
+#define NUM_PRESETS 6
 
 // Define MIDI CC numbers
 #define CC_SELECT_PRESET_SLOT 116
@@ -52,14 +52,14 @@ uint8_t selectedPreset = 0;
 bool recallPresetsFromFlash()
 {
   #ifdef DEBUG
-    RK002_printf("Reading flash");
+    RK002_printf("Read mem");
   #endif
   uint8_t res = RK002_readFlash(0, sizeof(flashData), (byte*)&flashData);
 
   // init flash if readback failed:
   if (res != 0 || flashData.signature != FLASH_SIGNATURE) {
     #ifdef DEBUG
-      RK002_printf("Reading flash failed");
+      RK002_printf("Read mem fail");
     #endif
 
     //set all values as 255 = do not transmit
@@ -77,11 +77,11 @@ void storeAllPresetsInFlash()
   // Put current settings to selected preset slot
   storeCurrentSettingsToPreset();
   #ifdef DEBUG
-    RK002_printf("Writing to flash");
+    RK002_printf("Write mem");
   #endif
   int res = RK002_writeFlash(0, sizeof(flashData), (byte*)&flashData);
   #ifdef DEBUG
-    if (res != 0) RK002_printf("Write failed");
+    if (res != 0) RK002_printf("Write fail");
   #endif
 
 }
@@ -89,7 +89,7 @@ void storeAllPresetsInFlash()
 void storeCurrentSettingsToPreset()
 {
   #ifdef DEBUG
-    RK002_printf("Saving active settings to flashdata array");
+    RK002_printf("Store to pres %d",selectedPreset);
   #endif
   for (int i=0;i<127;i++)
   {
@@ -103,8 +103,9 @@ void storeCurrentSettingsToPreset()
 // Send current preset to GenMDM, store in GenMDM RAM for faster access
 void sendPresetToDevice(byte presetNo, byte ch)
 {
+  if (presetNo > NUM_PRESETS) return;
   #ifdef DEBUG
-    RK002_printf("Sending preset %02d", selectedPreset);
+    RK002_printf("Send preset %02d", selectedPreset);
   #endif
 
   for (uint8_t j = 0; j < 128; j++)
@@ -136,9 +137,9 @@ void sendPresetToDevice(byte presetNo, byte ch)
 void sendAllPresetsToDevice()
 {
   // Iterate through all presets and send the CCs to all of our five FM channels
-  for (uint8_t k = 0; k < NUM_PRESETS-1; k++) {
+  for (uint8_t k = 0; k < NUM_PRESETS; k++) {
     #ifdef DEBUG
-      RK002_printf("SENDALL: Sending preset %d to device", k);
+      RK002_printf("SENDALL: Send preset %d", k);
     #endif
     sendPresetToDevice(k,0);
     delay(100);
@@ -188,11 +189,16 @@ bool RK002_onChannelMessage(byte sts, byte d1, byte d2)
         // Do not send the message to Polymux processor
         doPoly = false;
 
+        //RK002_printf("%d %d",(sts & 0x0f),d1);
+
         switch (d1) {
           
           // Select preset slot
           case CC_SELECT_PRESET_SLOT:
             if (d2 < NUM_PRESETS) selectedPreset = d2;
+            #if DEBUG
+            RK002_printf("Slot %d",selectedPreset);
+            #endif
             return false;
             break;
             
@@ -350,8 +356,8 @@ void setup()
   enablePolyFM = RK002_paramGet(ENABLEPOLYFM);
   enablePolyPSG = RK002_paramGet(ENABLEPOLYPSG);
   #ifdef DEBUG
-    if (enablePolyFM) RK002_printf("FM Poly mode enabled");
-    if (enablePolyPSG) RK002_printf("PSG Poly mode enabled");
+    if (enablePolyFM) RK002_printf("FM Poly");
+    if (enablePolyPSG) RK002_printf("PSG Poly");
   #endif
   
   //initialize the active settings array
@@ -376,6 +382,8 @@ void setup()
       for (int i=1; i<6; i++)
         RK002_sendControlChange(i, 9, 1);
     }
+  } else {
+    storeAllPresetsInFlash();
   }
 }
 
